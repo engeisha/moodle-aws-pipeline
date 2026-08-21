@@ -1,0 +1,24 @@
+name: Deploy Moodle Pipeline
+
+on:
+  push:
+    branches: [ dev, qa, main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Deploy to EC2 via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /var/www/html
+            sudo git fetch --all
+            sudo git checkout ${{ github.ref_name }}
+            sudo git pull origin ${{ github.ref_name }}
